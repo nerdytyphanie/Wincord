@@ -22,8 +22,8 @@ export type UserAssetType = (typeof CUSTOMIZABLE_ASSETS)[number];
 
 const DEFAULT_ASSETS: Record<UserAssetType, string> = {
     splash: "splash.webp",
-    tray: `tray/${process.platform === "darwin" ? "trayTemplate" : "tray"}.png`,
-    trayUnread: "tray/trayUnread.png"
+    tray: "wincord-tray.ico",
+    trayUnread: "wincord-tray.ico"
 };
 
 const UserAssetFolder = join(DATA_DIR, "userAssets");

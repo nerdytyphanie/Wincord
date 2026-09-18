@@ -34,17 +34,17 @@ autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = false;
 autoUpdater.fullChangelog = true;
 
-const isOutdated = autoUpdater.checkForUpdates().then(res => Boolean(res?.isUpdateAvailable));
+// Wincord releases are downloaded and restarted by the overlay.
+const isOutdated = Promise.resolve(false);
 
 handle(IpcEvents.UPDATER_IS_OUTDATED, () => isOutdated);
 handle(IpcEvents.UPDATER_OPEN, async () => {
-    const res = await autoUpdater.checkForUpdates();
-    if (res?.isUpdateAvailable && res.updateInfo) openUpdater(res.updateInfo);
+    return;
 });
 
 function openUpdater(update: UpdateInfo) {
     updaterWindow = new BrowserWindow({
-        title: "Vesktop Updater",
+        title: "Wincord Updater",
         autoHideMenuBar: true,
         webPreferences: {
             preload: join(__dirname, "updaterPreload.js")

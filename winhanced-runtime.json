@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "executable": "Wincord.exe",
+  "vesktop": "303e8c03ce7a65cf3dcccbb9f298119aa085711d",
+  "vencord": "59a54286542651fff5ea53f0ce6cadf2a6aa7521",
+  "support": "dist/js/support",
+  "vencordBundle": "dist/js/vencord"
+}

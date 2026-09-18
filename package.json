@@ -1,13 +1,13 @@
 {
-    "name": "vesktop",
+    "name": "wincord",
     "version": "1.6.7",
     "private": true,
-    "description": "Vesktop is a custom Discord desktop app",
+    "description": "Wincord desktop and headless Discord client for Winhanced",
     "keywords": [],
     "homepage": "https://vencord.dev/",
     "license": "GPL-3.0-or-later",
     "author": "Vendicated <vendicated@riseup.net>",
-    "main": "dist/js/main.js",
+    "main": "headless.cjs",
     "scripts": {
         "build": "tsx scripts/build/build.mts",
         "build:dev": "pnpm build --dev",
@@ -64,16 +64,18 @@
         "pnpm": ">=11"
     },
     "build": {
-        "appId": "dev.vencord.vesktop",
-        "productName": "Vesktop",
-        "executableName": "vesktop",
+        "appId": "com.winhanced.wincord",
+        "productName": "Wincord",
+        "executableName": "Wincord",
         "files": [
             "!*",
             "!node_modules",
             "dist/js",
             "static",
             "package.json",
-            "LICENSE"
+            "LICENSE",
+            "headless.cjs",
+            "winhanced-runtime.json"
         ],
         "protocols": {
             "name": "Discord",
@@ -87,7 +89,7 @@
             "appimage": "1.0.3"
         },
         "linux": {
-            "icon": "build/icon.svg",
+            "icon": "build/wincord.svg",
             "category": "Network",
             "maintainer": "vendicated+vesktop@riseup.net",
             "target": [
@@ -122,13 +124,13 @@
             ],
             "desktop": {
                 "entry": {
-                    "Name": "Vesktop",
+                    "Name": "Wincord",
                     "GenericName": "Internet Messenger",
                     "Type": "Application",
                     "Categories": "Network;InstantMessaging;Chat;",
                     "Keywords": "discord;vencord;electron;chat;",
                     "MimeType": "x-scheme-handler/discord",
-                    "StartupWMClass": "vesktop"
+                    "StartupWMClass": "wincord"
                 }
             }
         },
@@ -179,7 +181,7 @@
             "oneClick": false
         },
         "win": {
-            "icon": "build/icon.ico",
+            "icon": "build/wincord.ico",
             "target": [
                 {
                     "target": "nsis",
@@ -197,9 +199,7 @@
                 }
             ]
         },
-        "publish": {
-            "provider": "github"
-        },
+        "publish": null,
         "rpm": {
             "fpm": [
                 "--rpm-rpmbuild-define=_build_id_links none"

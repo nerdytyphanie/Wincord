@@ -5,8 +5,10 @@
  */
 
 import type { BrowserWindowConstructorOptions } from "electron";
+import { join } from "path";
 
 export const SplashProps: BrowserWindowConstructorOptions = {
+    icon: join(__dirname, "../../static/wincord.ico"),
     transparent: true,
     frame: false,
     height: 350,

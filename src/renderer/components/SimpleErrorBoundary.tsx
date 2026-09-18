@@ -32,7 +32,7 @@ function Fallback() {
         <Card variant="danger">
             <HeadingTertiary>Something went wrong.</HeadingTertiary>
             <Paragraph>
-                Please make sure Vencord and Vesktop are fully up to date. You can get help in our{" "}
+                Please make sure Vencord and Wincord are fully up to date. You can get help in our{" "}
                 <TextButton variant="link" onClick={openSupportChannel}>
                     Support Channel
                 </TextButton>

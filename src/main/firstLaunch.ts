@@ -6,14 +6,11 @@
 
 import { app } from "electron";
 import { BrowserWindow } from "electron/main";
-import { copyFileSync, mkdirSync, readdirSync } from "fs";
-import { join } from "path";
 import { SplashProps } from "shared/browserWinProperties";
 
-import { autoStart } from "./autoStart";
-import { DATA_DIR } from "./constants";
 import { createWindows } from "./mainWindow";
-import { Settings, State } from "./settings";
+import { State } from "./settings";
+import { importSettings, writeDesktopSettings } from "./wincordSettings";
 import { makeLinksOpenExternally } from "./utils/makeLinksOpenExternally";
 import { loadView } from "./vesktopStatic";
 
@@ -45,30 +42,8 @@ export function createFirstLaunchTour() {
         const data = JSON.parse(msg.slice(5)) as Data;
 
         State.store.firstLaunch = false;
-        Settings.store.discordBranch = data.discordBranch;
-        Settings.store.minimizeToTray = !!data.minimizeToTray;
-        Settings.store.arRPC = !!data.richPresence;
-
-        if (data.autoStart) autoStart.enable();
-
-        if (data.importSettings) {
-            const from = join(app.getPath("userData"), "..", "Vencord", "settings");
-            const to = join(DATA_DIR, "settings");
-            try {
-                const files = readdirSync(from);
-                mkdirSync(to, { recursive: true });
-
-                for (const file of files) {
-                    copyFileSync(join(from, file), join(to, file));
-                }
-            } catch (e) {
-                if (e instanceof Error && "code" in e && e.code === "ENOENT") {
-                    console.log("No Vencord settings found to import.");
-                } else {
-                    console.error("Failed to import Vencord settings:", e);
-                }
-            }
-        }
+        writeDesktopSettings({ discordBranch: data.discordBranch, minimizeToTray: !!data.minimizeToTray, richPresence: !!data.richPresence, autoStart: !!data.autoStart });
+        if (data.importSettings) importSettings();
 
         win.close();
 

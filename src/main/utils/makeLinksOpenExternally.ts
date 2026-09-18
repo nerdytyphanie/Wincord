@@ -49,6 +49,8 @@ export function handleExternalUrl(url: string, protocol?: string): { action: "de
 
 export function makeLinksOpenExternally(win: BrowserWindow) {
     win.webContents.setWindowOpenHandler(({ url, frameName, features }) => {
+        const nativeVideo = (globalThis as any).WincordHost?.windowOpen?.({ url, frameName, features });
+        if (nativeVideo) return nativeVideo;
         try {
             var { protocol, hostname, pathname, searchParams } = new URL(url);
         } catch {

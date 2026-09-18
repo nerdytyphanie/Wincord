@@ -17,7 +17,7 @@ const isWayland =
 
 const supportsLoopbackWithoutChrome = process.platform === "win32" && Number(release().split(".").pop()) >= 19045;
 
-export function registerScreenShareHandler() {
+export function registerScreenShareHandler(selectSource?: (sources: { id: string; name: string; url: string; displayId: string }[]) => Promise<StreamPick | null>) {
     handle(IpcEvents.CAPTURER_GET_LARGE_THUMBNAIL, async (_, id: string) => {
         const sources = await desktopCapturer.getSources({
             types: ["window", "screen"],
@@ -44,13 +44,14 @@ export function registerScreenShareHandler() {
 
         if (!sources) return callback({});
 
-        const data = sources.map(({ id, name, thumbnail }) => ({
+        const data = sources.map(({ id, name, thumbnail, display_id }) => ({
             id,
             name,
+            displayId: display_id,
             url: thumbnail.toDataURL()
         }));
 
-        if (isWayland) {
+        if (isWayland && !selectSource) {
             const video = data[0];
             if (video) {
                 const stream = await sendRendererCommand<StreamPick>(IpcCommands.SCREEN_SHARE_PICKER, {
@@ -65,10 +66,11 @@ export function registerScreenShareHandler() {
             return;
         }
 
-        const choice = await sendRendererCommand<StreamPick>(IpcCommands.SCREEN_SHARE_PICKER, {
+        const overlayChoice = await (globalThis as any).WincordHost?.selectCaptureSource?.(data);
+        const choice = overlayChoice !== undefined ? overlayChoice : await (selectSource ? selectSource(data) : sendRendererCommand<StreamPick>(IpcCommands.SCREEN_SHARE_PICKER, {
             screens: data,
             skipPicker: false
-        }).catch(e => {
+        })).catch(e => {
             console.error("Error during screenshare picker", e);
             return null;
         });

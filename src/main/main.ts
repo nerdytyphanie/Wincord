@@ -20,8 +20,9 @@ import { registerScreenShareHandler } from "./screenShare";
 import { Settings, State } from "./settings";
 import { setAsDefaultProtocolClient } from "./utils/setAsDefaultProtocolClient";
 import { isDeckGameMode } from "./utils/steamOS";
+import { initializeOverlayDesktop, readDesktopSettings, writeDesktopSettings } from "./wincordSettings";
 
-console.log("Vesktop v" + app.getVersion());
+console.log("Wincord v" + app.getVersion());
 
 // Make the Vencord files use our DATA_DIR
 process.env.VENCORD_USER_DATA_DIR = DATA_DIR;
@@ -92,6 +93,7 @@ function init() {
     if (isDeckGameMode) nativeTheme.themeSource = "dark";
 
     app.on("second-instance", (_event, _cmdLine, _cwd, data: any) => {
+        if (data.wincord?.pipe) { (globalThis as any).WincordHost?.attach(data.wincord); return; }
         if (data.IS_DEV) app.quit();
         else if (mainWin) {
             if (mainWin.isMinimized()) mainWin.restore();
@@ -101,12 +103,13 @@ function init() {
     });
 
     app.whenReady().then(async () => {
-        if (process.platform === "win32") app.setAppUserModelId("dev.vencord.vesktop");
+        if (process.platform === "win32") app.setAppUserModelId("com.winhanced.wincord");
 
         registerScreenShareHandler();
         registerMediaPermissionsHandler();
 
         bootstrap();
+        (globalThis as any).WincordHost?.attach((globalThis as any).WincordHost?.attachment);
 
         app.on("activate", () => {
             if (BrowserWindow.getAllWindows().length === 0) createWindows();
@@ -114,12 +117,12 @@ function init() {
     });
 }
 
-if (!app.requestSingleInstanceLock({ IS_DEV })) {
+if (!app.requestSingleInstanceLock({ IS_DEV, wincord: (globalThis as any).WincordHost?.attachment })) {
     if (IS_DEV) {
-        console.log("Vesktop is already running. Quitting previous instance...");
+        console.log("Wincord is already running. Quitting previous instance...");
         init();
     } else {
-        console.log("Vesktop is already running. Quitting...");
+        console.log("Wincord is already running. Quitting...");
         app.quit();
     }
 } else {
@@ -127,7 +130,12 @@ if (!app.requestSingleInstanceLock({ IS_DEV })) {
 }
 
 async function bootstrap() {
-    if (!Object.hasOwn(State.store, "firstLaunch")) {
+    const host = (globalThis as any).WincordHost;
+    if (host) host.settings = { read: readDesktopSettings, write: writeDesktopSettings };
+    if (host?.attachment?.pipe) {
+        initializeOverlayDesktop();
+        createWindows();
+    } else if (!Object.hasOwn(State.store, "firstLaunch")) {
         createFirstLaunchTour();
     } else {
         createWindows();
