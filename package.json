@@ -1,6 +1,6 @@
 {
     "name": "wincord",
-    "version": "1.6.7",
+    "version": "1.6.7-wincord.1",
     "private": true,
     "description": "Wincord desktop and headless Discord client for Winhanced",
     "keywords": [],
@@ -9,6 +9,7 @@
     "author": "Vendicated <vendicated@riseup.net>",
     "main": "headless.cjs",
     "scripts": {
+        "fetch:vencord": "tsx scripts/build/fetchVencord.mts",
         "build": "tsx scripts/build/build.mts",
         "build:dev": "pnpm build --dev",
         "buildLibVesktop": "pnpm -C packages/libvesktop install && pnpm -C packages/libvesktop run build",

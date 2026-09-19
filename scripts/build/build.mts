@@ -9,6 +9,9 @@ import { copyFile } from "fs/promises";
 
 import vencordDep from "./vencordDep.mjs";
 import { includeDirPlugin } from "./includeDirPlugin.mts";
+import { fetchVencord } from "./fetchVencord.mts";
+
+await fetchVencord();
 
 const isDev = process.argv.includes("--dev");
 
@@ -76,6 +79,25 @@ async function copyLibVesktop() {
 await Promise.all([
     copyVenmic(),
     copyLibVesktop(),
+    createContext({
+        ...NodeCommonOpts,
+        entryPoints: ["scripts/build/runtime-main.ts"],
+        outfile: "dist/js/support/main.cjs"
+    }),
+    createContext({
+        ...NodeCommonOpts,
+        format: "iife",
+        globalName: "WinhancedRuntimeNative",
+        entryPoints: ["scripts/build/runtime-preload.ts"],
+        outfile: "dist/js/support/preload.js"
+    }),
+    createContext({
+        ...CommonOpts,
+        format: "iife",
+        entryPoints: ["src/renderer/patches/fixStreamConstraints.ts"],
+        outfile: "dist/js/support/renderer.js",
+        plugins: [vencordDep]
+    }),
     createContext({
         ...NodeCommonOpts,
         entryPoints: ["src/main/index.ts"],

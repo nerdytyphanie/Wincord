@@ -1,60 +1,95 @@
-# Vesktop
+# Wincord
 
-Vesktop is a custom Discord desktop app
+Wincord is a Discord desktop client with an optional headless mode, based on
+[Vesktop](https://github.com/Vencord/Vesktop) and
+[Vencord](https://github.com/Vendicated/Vencord).
 
-**Main features**:
-- Vencord preinstalled
-- Much more lightweight and faster than the official Discord app
-- Linux Screenshare with sound & wayland
-- Much better privacy, since Discord has no access to your system
+## Desktop mode
 
-**Not yet supported**:
-- Global Keybinds
-- see the [Roadmap](https://github.com/Vencord/Vesktop/issues/324)
+Launch `Wincord.exe` to use the normal desktop client:
 
-![](https://github.com/Vencord/Vesktop/assets/45497981/8608a899-96a9-4027-9725-2cb02ba189fd)
-![](https://github.com/Vencord/Vesktop/assets/45497981/8701e5de-52c4-4346-a990-719cb971642e)
+- Servers, channels, direct messages, friends, reactions, emoji, GIFs, and stickers.
+- Voice calls, incoming streams and webcams, and screen sharing.
+- Vencord plugins, themes, and customization.
+- A system tray icon and a minimize-to-tray option.
+- Optional startup with Windows and Rich Presence support.
+- First-run setup when launched independently, including settings import.
+- Separate application and tray icons with Wincord branding.
 
-## Installing
+An external integration can attach to the running desktop client and use its
+existing Discord session. Closing the window to the tray keeps the client
+running when minimize-to-tray is enabled.
 
-Visit https://vesktop.dev/install
+## Headless mode and integrations
 
-## Building from Source
+The `--headless` switch starts a hidden host for an application-supplied
+integration. It does not open the normal desktop window or first-run setup form.
+Headless startup requires a compatible extension and a private IPC connection;
+the switch alone is not a standalone background-client setup.
 
-You need to have the following dependencies installed:
-- [Git](https://git-scm.com/downloads)
-- [Node.js](https://nodejs.org/en/download)
-- pnpm: `npm install --global pnpm`
+The host provides profile selection, extension loading, single-instance
+attachment, desktop settings access, and integration with the existing screen
+capture machinery. A compatible extension can expose Discord data and actions,
+login flows, and received video to an external interface. Those integration
+features require the extension; they are not a separate interface bundled with
+this repository.
 
-Packaging will create builds in the dist/ folder
+Desktop and headless modes use the same profile by default. An integrating
+application can supply a different profile and manage startup, mode changes,
+and updates.
 
-```sh
-git clone https://github.com/Vencord/Vesktop
-cd Vesktop
+## Windows runtime package
 
-# Install Dependencies
-pnpm i
+The Windows x64 runtime archive, `Wincord-1.6.7-wincord.1-win-x64.7z`, contains the
+executable, Electron runtime, application assets, and all language packs.
+Extract the complete archive into one directory before launching `Wincord.exe`.
+Electron does not need to be installed separately.
 
-# Either run it without packaging
-pnpm start
+An integrating application can download and extract this archive silently using
+its own extraction component. Preserve user profiles and session data when
+replacing the runtime.
 
-# Or package (will build packages for your OS)
-pnpm package
+Automatic Vesktop updater checks are disabled. Updates are delivered through
+Wincord releases or managed by the integrating application.
 
-# Or only build the Linux Pacman package
-pnpm package --linux pacman
+## Source and builds
 
-# Or package to a directory only
-pnpm package:dir
-```
+The project uses Node.js 22 or newer and pnpm 11 or newer. Use the pnpm version
+declared in `package.json`.
 
-## Building LibVesktop from Source
+~~~sh
+pnpm install --frozen-lockfile
+pnpm build
+~~~
 
-This is a small C++ helper library Vesktop uses on Linux to emit D-Bus events. By default, prebuilt binaries for x64 and arm64 are used.
+The build downloads the latest prebuilt Vencord release using the same downloader
+as upstream Vesktop. It also compiles the three support bundles from the source
+in this repository: the main-process interface, native preload bridge, and
+audio/video capture-constraint fixes. No Vencord source checkout or pre-populated
+build-output directory is required.
 
-If you want to build it from source:
-1. Install build dependencies:
-    - Debian/Ubuntu: `apt install build-essential python3 curl pkg-config libglib2.0-dev`
-    - Fedora: `dnf install @c-development @development-tools python3 curl pkgconf-pkg-config glib2-devel`
-2. Run `pnpm buildLibVesktop`
-3. From now on, building Vesktop will use your own build
+To package the Windows x64 runtime after building:
+
+~~~sh
+pnpm exec electron-builder --win --x64 --dir
+~~~
+
+The complete runtime is written to `dist/win-unpacked`. Archive that directory
+with 7-Zip to produce the downloadable `.7z`; retain all of its language packs
+and runtime files. The existing `pnpm package` command retains upstream platform
+packaging targets.
+
+`pnpm fetch:vencord` downloads the Vencord assets without building the rest of
+the app. Their release URL and SHA-256 hashes are recorded in the generated
+bundle manifest. Since upstream release tags can change, builds at different
+times may include different Vencord assets.
+
+Vencord source is unmodified. Compiled support files, downloaded Vencord assets,
+and dependencies remain build outputs and are not committed to this repository.
+
+## Upstream and licensing
+
+Wincord retains upstream copyright notices and uses the
+[GPL-3.0-or-later license](LICENSE). Vencord and Electron retain their own
+licenses and attribution. Windows is the current packaged integration target;
+upstream platform build definitions remain in the repository.

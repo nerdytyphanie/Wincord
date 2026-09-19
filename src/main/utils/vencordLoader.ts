@@ -47,7 +47,8 @@ export async function githubGet(endpoint: string) {
 export async function downloadVencordFiles() {
     const release = await githubGet("/repos/Vendicated/Vencord/releases/latest");
 
-    const { assets }: ReleaseData = await release.json();
+    const releaseData: ReleaseData = await release.json();
+    const { assets } = releaseData;
 
     await Promise.all(
         assets
@@ -56,6 +57,7 @@ export async function downloadVencordFiles() {
                 downloadFile(browser_download_url, join(VENCORD_FILES_DIR, name), {}, { retryOnNetworkError: true })
             )
     );
+    return releaseData;
 }
 
 const existsAsync = (path: string) =>
