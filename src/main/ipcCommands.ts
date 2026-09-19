@@ -9,6 +9,7 @@ import { ipcMain } from "electron";
 import { IpcEvents } from "shared/IpcEvents";
 
 const resolvers = new Map<string, Record<"resolve" | "reject", (data: any) => void>>();
+let listening = false;
 
 export interface IpcMessage {
     nonce: string;
@@ -37,6 +38,19 @@ export function sendRendererCommand<T = any>(message: string, data?: any) {
         return Promise.reject(new Error("Main window is destroyed"));
     }
 
+    // Importing the capture helper in headless mode must not subscribe a
+    // desktop resolver to the overlay's renderer replies on the same channel.
+    if (!listening) {
+        ipcMain.on(IpcEvents.IPC_COMMAND, (_event, { nonce, ok, data }: IpcResponse) => {
+            const resolver = resolvers.get(nonce);
+            if (!resolver) return;
+            if (ok) resolver.resolve(data);
+            else resolver.reject(data);
+            resolvers.delete(nonce);
+        });
+        listening = true;
+    }
+
     const nonce = randomUUID();
 
     const promise = new Promise<T>((resolve, reject) => {
@@ -47,16 +61,3 @@ export function sendRendererCommand<T = any>(message: string, data?: any) {
 
     return promise;
 }
-
-ipcMain.on(IpcEvents.IPC_COMMAND, (_event, { nonce, ok, data }: IpcResponse) => {
-    const resolver = resolvers.get(nonce);
-    if (!resolver) throw new Error(`Unknown message: ${nonce}`);
-
-    if (ok) {
-        resolver.resolve(data);
-    } else {
-        resolver.reject(data);
-    }
-
-    resolvers.delete(nonce);
-});

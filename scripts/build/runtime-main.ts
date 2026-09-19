@@ -2,3 +2,4 @@
 export { BrowserUserAgent } from "../../src/main/constants";
 export { IpcEvents } from "../../src/shared/IpcEvents";
 export { registerScreenShareHandler } from "../../src/main/screenShare";
+export { autoStart } from "../../src/main/autoStart";

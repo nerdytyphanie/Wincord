@@ -41,7 +41,7 @@ export function writeDesktopSettings(data: Record<string, any>) {
 }
 export function initializeOverlayDesktop() {
     if ((State.store as any).wincordOverlaySetup) return;
-    writeDesktopSettings({ discordBranch: "stable", autoStart: true, richPresence: true,
+    writeDesktopSettings({ discordBranch: "stable", autoStart: (State.store as any).wincordAutoStartEnabled ?? true, richPresence: true,
         minimizeToTray: true, importSettings: true });
     (State.store as any).wincordOverlaySetup = true;
 }

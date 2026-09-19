@@ -40,7 +40,7 @@ and updates.
 
 ## Windows runtime package
 
-The Windows x64 runtime archive, `Wincord-1.6.7-wincord.2-win-x64.7z`, contains the
+The Windows x64 runtime archive, `Wincord-1.6.7-wincord.3-win-x64.7z`, contains the
 executable, Electron runtime, application assets, and all language packs.
 Extract the complete archive into one directory before launching `Wincord.exe`.
 Electron does not need to be installed separately.

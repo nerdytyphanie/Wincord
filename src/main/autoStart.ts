@@ -5,6 +5,7 @@
  */
 
 import { app } from "electron";
+import { execFileSync } from "child_process";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { stripIndent } from "shared/utils/text";
@@ -78,12 +79,31 @@ const autoStartWindowsMac: AutoStart = {
         // Windows only reports openAtLogin as true when queried with the same args set in enable()
         return openAtLogin || executableWillLaunchAtLogin;
     },
-    enable: () =>
+    enable: () => {
         app.setLoginItemSettings({
             openAtLogin: true,
             args: Settings.store.autoStartMinimized ? ["--start-minimized"] : []
-        }),
-    disable: () => app.setLoginItemSettings({ openAtLogin: false })
+        });
+        (State.store as any).wincordAutoStartEnabled = true;
+    },
+    disable: () => {
+        // Clear every registration Electron reports for this executable, not
+        // only the current app-name/argument combination. Include old Wincord
+        // names so registrations from earlier runtime locations are removed.
+        const entries = process.platform === "win32" ? app.getLoginItemSettings().launchItems : [];
+        app.setLoginItemSettings({ openAtLogin: false });
+        if (process.platform === "win32") {
+            for (const name of new Set(["Wincord", "com.winhanced.wincord", ...entries.map(item => item.name)]))
+                app.setLoginItemSettings({ openAtLogin: false, name });
+            // Electron's setter removes per-user entries. Machine-wide entries
+            // it reports need removal from the corresponding Windows Run key.
+            for (const entry of entries.filter(item => item.scope === "machine"))
+                execFileSync(join(process.env.SystemRoot!, "System32", "reg.exe"),
+                    ["delete", "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/v", entry.name, "/f"], { windowsHide: true });
+        }
+        (State.store as any).wincordAutoStartEnabled = false;
+        if (autoStartWindowsMac.isEnabled()) throw new Error("Windows still has an enabled Wincord startup entry");
+    }
 };
 
 // The portal call uses the app id by default, which is org.chromium.Chromium, even in packaged Vesktop.
