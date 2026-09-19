@@ -82,7 +82,11 @@ await Promise.all([
     createContext({
         ...NodeCommonOpts,
         entryPoints: ["scripts/build/runtime-main.ts"],
-        outfile: "dist/js/support/main.cjs"
+        outfile: "dist/js/support/main.cjs",
+        // Shared upstream modules resolve workers and static assets relative to
+        // dist/js. This extra support directory must not change that base path.
+        define: { ...NodeCommonOpts.define, __dirname: "WINCORD_RUNTIME_JS_DIR" },
+        banner: { js: 'const WINCORD_RUNTIME_JS_DIR = require("node:path").resolve(__dirname, "..");' }
     }),
     createContext({
         ...NodeCommonOpts,

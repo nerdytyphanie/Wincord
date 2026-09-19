@@ -8,8 +8,6 @@ import { randomUUID } from "crypto";
 import { ipcMain } from "electron";
 import { IpcEvents } from "shared/IpcEvents";
 
-import { mainWin } from "./mainWindow";
-
 const resolvers = new Map<string, Record<"resolve" | "reject", (data: any) => void>>();
 
 export interface IpcMessage {
@@ -31,6 +29,9 @@ export interface IpcResponse {
  * You must add a handler for the message in the renderer process.
  */
 export function sendRendererCommand<T = any>(message: string, data?: any) {
+    // The headless capture interface supplies its own source picker. Importing
+    // this IPC helper must not start the desktop window/first-run module graph.
+    const { mainWin } = require("./mainWindow") as typeof import("./mainWindow");
     if (mainWin.isDestroyed()) {
         console.warn("Main window is destroyed, cannot send IPC command:", message);
         return Promise.reject(new Error("Main window is destroyed"));
