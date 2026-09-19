@@ -23,7 +23,7 @@ export type UserAssetType = (typeof CUSTOMIZABLE_ASSETS)[number];
 const DEFAULT_ASSETS: Record<UserAssetType, string> = {
     splash: "splash.webp",
     tray: "wincord-tray.ico",
-    trayUnread: "wincord-tray.ico"
+    trayUnread: "wincord-tray-unread.ico"
 };
 
 const UserAssetFolder = join(DATA_DIR, "userAssets");
