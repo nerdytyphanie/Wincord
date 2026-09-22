@@ -1,0 +1,13 @@
+diff --git a/src/process/native/win32.js b/src/process/native/win32.js
+index 271549f2943e5b2101a42619a9fbce68d135059d..77f96e7c0389475c32eafc57a3f4fb0737bc5506 100644
+--- a/src/process/native/win32.js
++++ b/src/process/native/win32.js
+@@ -8,7 +8,7 @@ export async function getProcesses() {
+     '-NoProfile',
+     '-Command',
+     'Get-CimInstance Win32_Process | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress'
+-  ]);
++  ], { windowsHide: true });
+ 
+   const rows = JSON.parse(stdout);
+   const list = Array.isArray(rows) ? rows : [rows]; // single result isn't wrapped in an array
